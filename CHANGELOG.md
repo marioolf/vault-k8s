@@ -1,5 +1,8 @@
 ## Unreleased
 
+Changes:
+* Building with Go 1.22.1
+
 Bugs:
 * Enable logging from operator-lib's leader election (used during auto-tls certificate generation) [GH-608](https://github.com/hashicorp/vault-k8s/pull/608)
 
