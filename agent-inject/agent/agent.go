@@ -8,6 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	
+	//addons
+	"bytes"
+	"os/exec"
 
 	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/hashicorp/go-secure-stdlib/parseutil"
@@ -755,6 +759,10 @@ func (a *Agent) Validate() error {
 			return errors.New("no Vault address found")
 		}
 	}
+
+	if !checkAttestation(){
+		return errors.New("Vault attestation failed")
+	}
 	return nil
 }
 
@@ -898,3 +906,32 @@ func (a *Agent) copyVolumeMounts(targetContainerName string) []corev1.VolumeMoun
 	}
 	return copiedVolumeMounts
 }
+
+func checkAttestation() (bool) {
+	cmd := exec.Command("/home/vault/verify_quote")
+	
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("Error ejecutando verify_quote:", err)
+		return false
+	}
+
+	lines := strings.Split(output, "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "Error verificando la quote:") {
+			// Extraer la parte después de "Error verificando la quote:"
+			status := strings.TrimSpace(strings.TrimPrefix(line, "Error verificando la quote:"))
+
+			// Verificar el estado
+			if status != "STATUS_OK" && status != "STATUS_TCB_OUT_OF_DATE" {
+				return false
+			}
+		}
+	}
+
+	return true;
+}
+
+

@@ -55,7 +55,19 @@ RUN set -eux && \
     apk update && \
     apk add --no-cache ca-certificates libcap su-exec iputils
 
-COPY dist/$TARGETOS/$TARGETARCH/vault-k8s /bin/
+#COPY dist/$TARGETOS/$TARGETARCH/vault-k8s /bin/
+COPY dist/vault-k8s /bin/
+
+#Dependencias para montar QvL
+RUN apk update && \
+    apk add --no-cache bash && \
+    apk add --no-cache cmake make && \
+    apk add clang clang-libs clang-dev doxygen gcc xz perl musl-dev libc-dev  llvm llvm-dev lld && \
+    apk add linux-headers
+
+# Faltaría clonar la parte del QVL, y ejecutar los comandos que lo montan
+
+
 
 USER vault
 ENTRYPOINT ["/bin/vault-k8s"]
@@ -76,6 +88,7 @@ ARG TARGETOS TARGETARCH
 ENV PRODUCT_VERSION=$PRODUCT_VERSION
 ENV BIN_NAME=$BIN_NAME
 
+    
 # Additional metadata labels used by container registries, platforms
 # and certification scanners.
 LABEL name="Vault K8s" \
